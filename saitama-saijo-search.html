@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>埼玉県 公営斎場検索 - 葬儀社実務用</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#1a2744;--navy-light:#2a3a5c;--navy-dark:#0f1a30;
+  --gold:#b8964e;--gold-light:#d4b477;
+  --gray:#f5f5f3;--gray-mid:#e0ddd8;--gray-dark:#6b6b6b;
+  --white:#fff;--text:#2c2c2c;--text-light:#555;
+  --red:#c0392b;--green:#27713b;
+}
+body{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;background:var(--gray);color:var(--text);line-height:1.7;min-height:100vh}
+header{background:linear-gradient(135deg,var(--navy-dark),var(--navy));color:var(--white);padding:28px 20px 24px;text-align:center;border-bottom:3px solid var(--gold)}
+header h1{font-size:1.5rem;font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+header p{font-size:.85rem;color:var(--gold-light);letter-spacing:.05em}
+.container{max-width:900px;margin:0 auto;padding:20px 16px 40px}
+.search-box{background:var(--white);border-radius:10px;padding:28px 24px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:20px}
+.search-box label{display:block;font-weight:700;font-size:.95rem;margin-bottom:12px;color:var(--navy)}
+.input-row{display:flex;gap:10px;align-items:stretch}
+.input-row input{flex:1;padding:12px 16px;border:2px solid var(--gray-mid);border-radius:8px;font-size:1rem;font-family:inherit;transition:border-color .2s}
+.input-row input:focus{outline:none;border-color:var(--gold)}
+.input-row button{padding:12px 28px;background:var(--navy);color:var(--white);border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;white-space:nowrap}
+.input-row button:hover{background:var(--navy-light)}
+.hint{font-size:.78rem;color:var(--gray-dark);margin-top:8px}
+.quick-list{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.quick-list button{padding:5px 12px;font-size:.78rem;background:var(--gray);border:1px solid var(--gray-mid);border-radius:20px;cursor:pointer;font-family:inherit;transition:all .15s}
+.quick-list button:hover{background:var(--gold-light);border-color:var(--gold);color:var(--navy-dark)}
+#results{min-height:100px}
+.result-card{background:var(--white);border-radius:10px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:16px;border-left:4px solid var(--navy)}
+.result-card.no-crematory{border-left-color:var(--red)}
+.result-municipality{font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.result-status{font-size:.82rem;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:14px;font-weight:600}
+.result-status.ok{background:#e8f5e9;color:var(--green)}
+.result-status.none{background:#fdecea;color:var(--red)}
+.result-status.private-status{background:#fff8e1;color:#8d6e00}
+.saijo-item{background:var(--gray);border-radius:8px;padding:16px;margin-bottom:10px}
+.saijo-item:last-child{margin-bottom:0}
+.saijo-name{font-weight:700;font-size:1.05rem;color:var(--navy-dark);margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.saijo-badge{font-size:.7rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-crematory{background:var(--navy);color:var(--white)}
+.badge-hall{background:var(--gold);color:var(--white)}
+.badge-private{background:#ff9800;color:var(--white)}
+.saijo-detail{font-size:.85rem;color:var(--text-light);margin-bottom:3px;padding-left:2px}
+.saijo-detail a{color:var(--navy);text-decoration:none}
+.saijo-detail a:hover{text-decoration:underline}
+.saijo-members{font-size:.8rem;color:var(--gray-dark);margin-top:8px;padding:8px 12px;background:var(--white);border-radius:6px}
+.saijo-members strong{color:var(--text)}
+.info-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.84rem}
+.info-table th{background:#e8e6e1;color:var(--navy-dark);padding:7px 10px;text-align:left;font-weight:600;width:38%;white-space:nowrap;font-size:.78rem}
+.info-table td{padding:7px 10px;border-bottom:1px solid var(--gray-mid);background:var(--white)}
+.info-table tr:last-child td{border-bottom:none}
+.avail-tag{font-size:.72rem;padding:2px 6px;border-radius:8px;font-weight:600}
+.avail-yes{background:#e8f5e9;color:var(--green)}
+.avail-no{background:#fdecea;color:var(--red)}
+.avail-cond{background:#fff8e1;color:#8d6e00}
+.booking-tag{font-size:.72rem;padding:3px 8px;border-radius:8px;font-weight:600;display:inline-block;margin-right:4px}
+.booking-web{background:#e3f2fd;color:#1565c0}
+.booking-tel{background:#f3e5f5;color:#7b1fa2}
+.booking-window{background:#fff3e0;color:#e65100}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn-action{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-action:hover{opacity:.85;transform:translateY(-1px)}
+.btn-web{background:#1565c0;color:var(--white)}
+.btn-tel{background:var(--green);color:var(--white)}
+.btn-hp{background:var(--navy);color:var(--white)}
+.btn-detail{background:var(--gold);color:var(--white)}
+.btn-disabled{background:var(--gray-mid);color:var(--gray-dark);cursor:default;pointer-events:none}
+.note-box{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:14px 16px;margin-top:12px;font-size:.82rem;color:#6d5600}
+.all-list-section{background:var(--white);border-radius:10px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-top:16px}
+.all-list-section h2{font-size:1.1rem;color:var(--navy);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--gray-mid)}
+.all-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.all-table th{background:var(--navy);color:var(--white);padding:8px 6px;text-align:left;font-weight:600;position:sticky;top:0;white-space:nowrap}
+.all-table td{padding:7px 6px;border-bottom:1px solid var(--gray-mid);vertical-align:top}
+.all-table tr:hover td{background:#f0efe9}
+.tab-bar{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--gray-mid)}
+.tab-btn{padding:10px 20px;background:var(--gray);border:none;border-bottom:3px solid transparent;font-size:.88rem;font-family:inherit;cursor:pointer;font-weight:600;color:var(--gray-dark);transition:all .2s;margin-bottom:-2px}
+.tab-btn.active{background:var(--white);color:var(--navy);border-bottom-color:var(--gold)}
+.tab-btn:hover:not(.active){background:var(--gray-mid)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--white);border-radius:8px;padding:16px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.stat-number{font-size:1.8rem;font-weight:700;color:var(--navy)}
+.stat-label{font-size:.75rem;color:var(--gray-dark);margin-top:2px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;overflow-y:auto;padding:20px;justify-content:center;align-items:flex-start}
+.modal-overlay.open{display:flex}
+.modal-content{background:var(--white);border-radius:12px;max-width:820px;width:100%;margin:40px auto;padding:0;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.modal-header{background:linear-gradient(135deg,var(--navy-dark),var(--navy));color:var(--white);padding:20px 24px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.15rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--white);font-size:1.6rem;cursor:pointer;padding:0 4px;opacity:.8}
+.modal-close:hover{opacity:1}
+.modal-body{padding:24px}
+.modal-section{margin-bottom:20px}
+.modal-section-title{font-size:.9rem;font-weight:700;color:var(--navy);padding:6px 12px;background:var(--gray);border-left:3px solid var(--gold);margin-bottom:8px;border-radius:0 4px 4px 0}
+.modal-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:4px}
+.modal-table th{background:#f0efe9;padding:6px 10px;text-align:left;font-weight:600;width:35%;border-bottom:1px solid var(--gray-mid);font-size:.78rem;color:var(--navy-dark)}
+.modal-table td{padding:6px 10px;border-bottom:1px solid var(--gray-mid)}
+.modal-warnings{margin:4px 0;padding-left:0;list-style:none;font-size:.82rem}
+.modal-warnings li{padding:4px 8px;margin-bottom:3px;background:#fff8e1;border-left:3px solid #ff9800;border-radius:0 4px 4px 0;color:#6d5600}
+footer{text-align:center;padding:20px;font-size:.75rem;color:var(--gray-dark);border-top:1px solid var(--gray-mid);margin-top:10px}
+footer .warn{color:var(--red);font-weight:600}
+@media(max-width:600px){
+  header h1{font-size:1.2rem}
+  .input-row{flex-direction:column}
+  .input-row button{padding:14px}
+  .search-box{padding:20px 16px}
+  .result-card{padding:18px 16px}
+  .quick-list button{font-size:.72rem;padding:4px 10px}
+  .all-table{font-size:.7rem}
+  .all-table th,.all-table td{padding:5px 4px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .btn-row{gap:6px}
+  .btn-action{padding:7px 10px;font-size:.74rem}
+  .info-table th{width:35%;font-size:.72rem;padding:5px 6px}
+  .info-table td{padding:5px 6px;font-size:.78rem}
+  .modal-content{margin:10px auto}
+  .modal-body{padding:16px}
+  .tab-btn{padding:8px 12px;font-size:.78rem}
+}
+@media print{
+  header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .search-box,.tab-bar,.quick-list,.btn-row{display:none}
+  .tab-content{display:block!important}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>埼玉県 公営斎場検索</h1>
+  <p>現住所から市民料金で利用できる公営斎場を検索</p>
+</header>
+<div class="container">
+  <div class="search-box">
+    <label>お住まいの市区町村を入力してください</label>
+    <div class="input-row">
+      <input type="text" id="searchInput" list="municipalityList" placeholder="例：さいたま市、川越市、所沢市..." autocomplete="off">
+      <button onclick="doSearch()">検索</button>
+    </div>
+    <datalist id="municipalityList"></datalist>
+    <p class="hint">市区町村名を入力すると候補が表示されます。選択後「検索」を押してください。</p>
+    <div class="quick-list" id="quickList"></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('search')">検索結果</button>
+    <button class="tab-btn" onclick="switchTab('alllist')">全斎場一覧</button>
+    <button class="tab-btn" onclick="switchTab('allmunicipality')">全市町村一覧</button>
+  </div>
+  <div id="tab-search" class="tab-content active">
+    <div id="results" style="margin-top:16px">
+      <div style="text-align:center;padding:40px 20px;color:var(--gray-dark)">上の検索欄に市区町村名を入力して検索してください</div>
+    </div>
+  </div>
+  <div id="tab-alllist" class="tab-content">
+    <div class="all-list-section" style="margin-top:16px">
+      <h2>埼玉県 公営斎場・火葬場 全一覧</h2>
+      <div class="stats" id="stats"></div>
+      <div id="allCards"></div>
+    </div>
+  </div>
+  <div id="tab-allmunicipality" class="tab-content">
+    <div class="all-list-section" style="margin-top:16px">
+      <h2>市町村別 利用可能斎場一覧</h2>
+      <div style="overflow-x:auto"><table class="all-table" id="munTable">
+        <thead><tr><th>市町村名</th><th>利用可能な公営斎場</th><th>火葬料(税込)</th><th>状況</th></tr></thead>
+        <tbody id="munTableBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+<div id="detailModal" class="modal-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="detailTitle"></h2>
+      <button class="modal-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+<footer>
+  <p class="warn">※ 本データは各公式サイト・埼玉県公式情報・各斎場提供資料を基に作成していますが、最新の正確な情報は各斎場・各自治体にご確認ください。</p>
+  <p style="margin-top:6px">葬儀社実務用 公営斎場検索ツール</p>
+</footer>
+<script>
+const D=[
+{id:1,name:"さいたま市浦和斎場",addr:"さいたま市桜区大字下大久保1523-1",op:"さいたま市",tp:"public",fac:["c","h"],mun:["さいたま市"],
+ halls:[{n:"第1葬祭場",s:100},{n:"第2葬祭場",s:75},{n:"第3葬祭場",s:75}],
+ fee:{m:7000,nm:56000},hallNm:"no",cremNm:"yes",
+ tel:"048-855-6246",fax:"048-855-6247",booking:"tel",bookingUrl:null,hp:null,
+ note:"市外火葬は11時のみ。令和8年3月末で通夜室廃止。"},
+{id:2,name:"さいたま市大宮聖苑",addr:"さいたま市見沼区染谷2-350-1",op:"さいたま市",tp:"public",fac:["c"],mun:["さいたま市"],
+ halls:[],fee:{m:7000,nm:56000},hallNm:"-",cremNm:"yes",
+ tel:"048-682-2800",fax:null,booking:"tel",bookingUrl:null,hp:null,
+ note:"火葬専用（式場なし）。火葬炉10基。"},
+{id:3,name:"ひかり会館",addr:"さいたま市中央区本町東5-13-29",op:"さいたま市",tp:"public",fac:["h"],mun:["さいたま市"],
+ halls:[{n:"第1葬祭場",s:100},{n:"第2葬祭場(法要のみ)",s:30}],fee:{m:null,nm:null},hallNm:"-",cremNm:"-",
+ tel:"048-852-5561",fax:null,booking:"tel",bookingUrl:null,hp:null,
+ note:"式場のみ（火葬は浦和斎場/大宮聖苑）。市民限定。駐車場15台。"},
+{id:4,name:"思い出の里会館",addr:"さいたま市見沼区大字大谷600",op:"さいたま市",tp:"public",fac:["h"],mun:["さいたま市"],
+ halls:[{n:"第1葬祭場",s:100},{n:"第2葬祭場",s:50}],fee:{m:null,nm:null},hallNm:"-",cremNm:"-",
+ tel:"048-686-3499",fax:null,booking:"tel",bookingUrl:null,hp:null,
+ note:"式場のみ（火葬は大宮聖苑）。市民限定。令和5年リニューアル。"},
+{id:5,name:"川口市めぐりの森",addr:"川口市大字新井宿430-1",op:"川口市（指定管理：川口斎苑サービス）",tp:"public",fac:["c"],mun:["川口市"],
+ halls:[],fee:{m:30000,nm:100000},hallNm:"-",cremNm:"yes",
+ tel:"048-242-5414",fax:"048-242-5415",booking:"web",bookingUrl:"https://megurinomori.seagulloffice.com/kawaguchi",hp:null,
+ note:"火葬専用。火葬炉10基。市外は希望日2日前17時から予約可。"},
+{id:6,name:"川越市斎場・市民聖苑やすらぎのさと",addr:"川越市大字小仙波786-1",op:"川越市",tp:"public",fac:["c","h"],mun:["川越市"],
+ halls:[{n:"第1・2式場",s:150},{n:"第3・4式場",s:60},{n:"第5式場",s:100},{n:"第6式場",s:30},{n:"小式場1・2",s:30}],
+ fee:{m:0,nm:48000},hallNm:"cond",cremNm:"yes",
+ tel:"049-226-0090",fax:"049-226-7088",booking:"web+tel",bookingUrl:"https://www.kawagoe-saijo.jp/yoyaku/",hp:null,
+ note:"市民火葬無料。式場は故人or喪主が市民の場合利用可。祭壇持込不可。計8室。"},
+{id:7,name:"所沢市斎場",addr:"所沢市北原町1282",op:"所沢市（指定管理：所沢市公共施設管理公社）",tp:"public",fac:["c","h"],mun:["所沢市"],
+ halls:[{n:"第1式場",s:85},{n:"第2式場",s:50},{n:"第3式場",s:50},{n:"第5式場",s:40}],
+ fee:{m:5000,nm:60000},hallNm:"yes",cremNm:"yes",
+ tel:"04-2993-9931",fax:null,booking:"web",bookingUrl:"https://saijyo3.seagulloffice.com/tokorozawa/user",hp:null,
+ note:"火葬炉8基。式場は控室セット利用必須。"},
+{id:8,name:"広域飯能斎場",addr:"飯能市大字飯能948-3",op:"広域飯能斎場組合（飯能市・狭山市・日高市）",tp:"public",fac:["c","h"],mun:["飯能市","狭山市","日高市"],
+ halls:[{n:"式場",s:70}],
+ fee:{m:5000,nm:null},hallNm:"yes",cremNm:"yes",
+ tel:null,fax:null,booking:"tel",bookingUrl:null,hp:null,
+ note:"式場は組合内25,000円/組合外50,000円(2日間)。"},
+{id:9,name:"入間東部広域斎場 しののめの里",addr:"富士見市下南畑70-1",op:"入間東部地区事務組合",tp:"public",fac:["c","h"],mun:["富士見市","ふじみ野市","三芳町"],
+ halls:[{n:"第1式場",s:80},{n:"第2式場",s:40},{n:"第3式場",s:120}],
+ fee:{m:10000,nm:80000},hallNm:"no",cremNm:"yes",
+ tel:"049-275-3030",fax:"049-275-3038",booking:"web",bookingUrl:null,hp:null,
+ note:"火葬炉6基。待合室7室(各48席)。式場は組合内住民のみ利用可。棺サイズ上限:幅70cm×長220cm×高60cm。"},
+{id:10,name:"上尾伊奈斎場つつじ苑",addr:"上尾市大字瓦葺150",op:"公益財団法人 上尾市地域振興公社",tp:"public",fac:["c","h"],mun:["上尾市","伊奈町"],
+ halls:[{n:"第1式場",s:60},{n:"第2式場",s:80},{n:"第3式場",s:150}],
+ fee:{m:7000,nm:61900},hallNm:"yes",cremNm:"yes",
+ tel:"048-720-7870",fax:"048-723-8321",booking:"web+tel",bookingUrl:"https://ageoina-saijotsutsujien.jp/",hp:"https://www.ageo-kousya.or.jp/tsutsuji/",
+ note:"常設祭壇（仏式3・正宗1・神式1・キリスト教1）外部持込不可。"},
+{id:11,name:"県央みずほ斎場",addr:"鴻巣市境1143",op:"県央みずほ広域事務組合",tp:"public",fac:["c","h"],mun:["鴻巣市","桶川市","北本市"],
+ halls:[{n:"第1式場",s:120},{n:"第2式場",s:80}],
+ fee:{m:7000,nm:60000},hallNm:"yes",cremNm:"yes",
+ tel:"048-569-2800",fax:"048-569-2838",booking:"web+tel",bookingUrl:null,hp:null,
+ note:"火葬炉8基。式場は管外2倍料金。待合室6室。指定管理：県央みずほ斎苑管理グループ。"},
+{id:12,name:"越谷市斎場",addr:"越谷市大字増林3989-1",op:"越谷市（市民協働部市民課斎場）",tp:"public",fac:["c","h"],mun:["越谷市","吉川市","松伏町"],
+ halls:[{n:"第1〜第4式場(各)",s:80}],
+ fee:{m:10000,nm:80000},hallNm:"no",cremNm:"yes",
+ tel:"048-960-6800",fax:"048-960-6801",booking:"window",bookingUrl:null,hp:null,
+ note:"式場4室。第3・4連結160名可。予約は役所窓口のみ（電話予約不可）。火葬炉14基。"},
+{id:13,name:"埼葛斎場",addr:"春日部市内牧1431",op:"埼葛斎場組合",tp:"public",fac:["c","h"],mun:["春日部市","蓮田市","白岡市","杉戸町"],
+ halls:[{n:"式場",s:50}],
+ fee:{m:10000,nm:60000},hallNm:"yes",cremNm:"yes",
+ tel:"048-752-3441",fax:"048-754-0022",booking:"web+tel",bookingUrl:null,hp:null,
+ note:"火葬炉8基(超大型1)。式場は備え付け祭壇使用（花祭壇不可）。待合室8室。"},
+{id:14,name:"メモリアルトネ",addr:"加須市川口4-3-5",op:"広域利根斎場組合（加須市・久喜市・幸手市・宮代町）",tp:"public",fac:["c","h"],mun:["加須市","久喜市","幸手市","宮代町"],
+ halls:[{n:"大式場",s:150},{n:"小式場",s:60}],
+ fee:{m:10000,nm:50000},hallNm:"yes",cremNm:"yes",
+ tel:"0480-65-8234",fax:"0480-65-8235",booking:"web+tel",bookingUrl:null,hp:"https://www.memorial-tone.jp/",
+ note:"火葬炉8基。棺サイズ制限あり(幅655mm)。全面禁煙・宿泊不可。"},
+{id:15,name:"三郷市斎場",addr:"三郷市茂田井15",op:"三郷市",tp:"public",fac:["c","h"],mun:["三郷市"],
+ halls:[{n:"本館式場",s:90},{n:"新館式場1",s:30},{n:"新館式場2",s:30}],
+ fee:{m:10000,nm:130000},hallNm:"cond",cremNm:"yes",
+ tel:"048-952-5885",fax:"048-952-8853",booking:"web+tel",bookingUrl:null,hp:null,
+ note:"令和8年4月改定料金。本館は市外利用可。新館・安置室は市内専用。火葬炉4基。"},
+{id:16,name:"東松山斎場",addr:"東松山市松山町2-8-32",op:"比企広域市町村圏組合",tp:"public",fac:["c","h"],mun:["東松山市","滑川町","嵐山町","小川町","川島町","吉見町","ときがわ町","東秩父村"],
+ halls:[{n:"葬祭場",s:100}],
+ fee:{m:10000,nm:70000},hallNm:"yes",cremNm:"yes",
+ tel:"0493-22-4279",fax:"0493-22-5695",booking:"tel",bookingUrl:null,hp:"https://higashimatsuyamasaijou.com/",
+ note:"火葬炉6基・動物炉1基。区域外は希望日2日前から受付。2026年3月料金改定済。"},
+{id:17,name:"越生斎場",addr:"入間郡越生町大字鹿下338-6",op:"広域静苑組合",tp:"public",fac:["c"],mun:["越生町","毛呂山町","鶴ヶ島市","鳩山町","坂戸市"],
+ halls:[],fee:{m:10000,nm:80000},hallNm:"-",cremNm:"yes",
+ tel:"049-292-5955",fax:"049-292-5956",booking:"tel",bookingUrl:null,hp:"https://k-seien.sakura.ne.jp/",
+ note:"火葬専用。火葬炉6基。告別収骨室6室。待合室6室(各35名)。"},
+{id:18,name:"秩父斎場",addr:"秩父市大宮5361-2",op:"秩父広域市町村圏組合",tp:"public",fac:["c"],mun:["秩父市","横瀬町","皆野町","長瀞町","小鹿野町"],
+ halls:[],
+ fee:{m:10000,nm:60000},hallNm:"-",cremNm:"yes",
+ tel:"0494-23-1678",fax:null,booking:"web+tel",bookingUrl:null,hp:null,
+ note:"火葬専用（式場なし）。人体炉4基。待合室5室(大4室各50名・小1室25名)。休場:日曜・1/1・1/2。売店なし。霊柩車あり。"},
+{id:19,name:"メモリアル彩雲",addr:"熊谷市円光2-9-40",op:"熊谷市",tp:"public",fac:["c","h"],mun:["熊谷市"],
+ halls:[{n:"第一式場",s:70},{n:"第二式場",s:40}],
+ fee:{m:10000,nm:60000},hallNm:"yes",cremNm:"yes",
+ tel:"048-521-0021",fax:"048-521-0153",booking:"web",bookingUrl:null,hp:null,
+ note:"火葬炉6基。式場は市民外3倍料金。宿泊可(21:00〜翌8:00)。"},
+{id:20,name:"深丘園",addr:"深谷市山河397-1",op:"深谷市",tp:"public",fac:["c"],mun:["深谷市"],
+ halls:[],fee:{m:7000,nm:100000},hallNm:"-",cremNm:"yes",
+ tel:"048-585-2900",fax:"048-585-8400",booking:"web+tel",bookingUrl:null,hp:null,
+ note:"火葬専用。火葬炉6基。小ホール(定員20名・祭壇設営不可)あり。"},
+{id:21,name:"こだま聖苑",addr:"児玉郡美里町大字木部537-4",op:"児玉郡市広域市町村圏組合",tp:"public",fac:["c","h"],mun:["本庄市","美里町","神川町","上里町"],
+ halls:[{n:"式場",s:100}],
+ fee:{m:7000,nm:60000},hallNm:"yes",cremNm:"yes",
+ tel:"0495-76-1881",fax:"0495-76-1882",booking:"window",bookingUrl:null,hp:null,
+ note:"火葬炉5基。予約は各市町村担当課窓口。翌日精算（印鑑持参）。"},
+{id:22,name:"行田市斎場",addr:"行田市大字佐間1751",op:"行田市",tp:"public",fac:["c","h"],mun:["行田市"],
+ halls:[{n:"第1式場",s:70},{n:"第2式場",s:70}],
+ fee:{m:10000,nm:70000},hallNm:"yes",cremNm:"yes",
+ tel:"048-559-1996",fax:null,booking:"web+tel",bookingUrl:null,hp:null,
+ note:"法要ホール2室(各72席)。棺サイズ上限:高54cm×幅64cm×長197cm(厳守)。市外火葬枠制限あり。"},
+{id:23,name:"羽生市斎場",addr:"羽生市東3-42-2",op:"羽生市",tp:"public",fac:["c"],mun:["羽生市"],
+ halls:[],fee:{m:3000,nm:45000},hallNm:"-",cremNm:"yes",
+ tel:"048-561-0436",fax:null,booking:"tel",bookingUrl:null,hp:null,
+ note:"火葬専用。待合室(和室)3室。休場日も予約受付可。TEL/FAX兼用。"},
+{id:24,name:"谷塚斎場",addr:"草加市瀬崎町4-6-36",op:"聖典株式会社（民営・草加市設置許可）",tp:"private",fac:["c","h"],mun:["草加市"],
+ halls:[{n:"東館式場(各)",s:60},{n:"西館式場(各)",s:50},{n:"南館式場",s:40},{n:"北館式場(各)",s:50},{n:"星館式場",s:24}],
+ fee:{m:59600,nm:74000},hallNm:"yes",cremNm:"yes",
+ tel:null,fax:null,booking:null,bookingUrl:null,hp:null,
+ note:"民営火葬場。式場11室。市民葬59,600円/一般74,000円。"},
+{id:25,name:"瑞穂斎場",addr:"東京都西多摩郡瑞穂町大字富士山栗原新田244",op:"瑞穂斎場組合（瑞穂町・福生市・羽村市・入間市・武蔵村山市）",tp:"public",fac:["c","h"],mun:["入間市"],
+ halls:[{n:"大ホール",s:150},{n:"中ホール",s:70},{n:"小ホール",s:40}],
+ fee:{m:0,nm:80000},hallNm:"yes",cremNm:"yes",
+ tel:null,fax:null,booking:null,bookingUrl:null,hp:null,
+ note:"東京都瑞穂町所在。組合内火葬無料。式場は組合外2倍料金。"},
+{id:26,name:"朝霞市斎場",addr:"朝霞市溝沼1259-1",op:"公益財団法人 朝霞市文化・スポーツ振興公社",tp:"public",fac:["h"],mun:["朝霞市"],
+ halls:[{n:"第一式場",s:145},{n:"第二式場",s:75}],fee:{m:null,nm:null},hallNm:"-",cremNm:"-",
+ tel:"048-460-0055",fax:"048-460-0056",booking:"window",bookingUrl:null,hp:null,
+ note:"式場専用（火葬場なし）。安置室6体分。出棺後の外部火葬場移動手配必須。"},
+{id:27,name:"新座市営墓園斎場",addr:"新座市新塚1-5-1",op:"新座市（指定管理：新座メモリアルグループ）",tp:"public",fac:["h"],mun:["新座市"],
+ halls:[{n:"斎場A",s:100},{n:"斎場B",s:100}],fee:{m:null,nm:null},hallNm:"-",cremNm:"-",
+ tel:"048-479-5688",fax:"048-479-5682",booking:"window+tel",bookingUrl:null,hp:null,
+ note:"式場専用（火葬場なし）。安置室1体。1時間単位課金制。"}
+];
+
+const NO_CREM={
+ "朝霞市":"4市共用火葬場を計画中。現在は浦和斎場等を市民外料金で利用。",
+ "志木市":"4市共用火葬場を計画中。現在は浦和斎場等を市民外料金で利用。",
+ "和光市":"4市共用火葬場を計画中。現在は浦和斎場等を市民外料金で利用。",
+ "新座市":"4市共用火葬場を計画中。現在は浦和斎場等を市民外料金で利用。",
+ "戸田市":"公営火葬場なし。浦和斎場・戸田葬祭場（民営）等を利用。",
+ "蕨市":"公営火葬場なし。浦和斎場・戸田葬祭場（民営）等を利用。",
+ "八潮市":"公営火葬場なし。三郷市斎場・谷塚斎場等を市民外料金で利用。",
+ "寄居町":"公営火葬場なし。深丘園（深谷市）・メモリアル彩雲（熊谷市）等を市民外料金で利用。"
+};
+
+const MUNS=[
+ "さいたま市","川越市","熊谷市","川口市","行田市","秩父市","所沢市","飯能市",
+ "加須市","本庄市","東松山市","春日部市","狭山市","羽生市","鴻巣市","深谷市",
+ "上尾市","草加市","越谷市","蕨市","戸田市","入間市","朝霞市","志木市",
+ "和光市","新座市","桶川市","久喜市","北本市","八潮市","富士見市","三郷市",
+ "蓮田市","坂戸市","幸手市","鶴ヶ島市","日高市","吉川市","ふじみ野市","白岡市",
+ "伊奈町","三芳町","毛呂山町","越生町","滑川町","嵐山町","小川町","川島町",
+ "吉見町","鳩山町","ときがわ町","横瀬町","皆野町","長瀞町","小鹿野町","東秩父村",
+ "美里町","神川町","上里町","寄居町","宮代町","杉戸町","松伏町"
+];
+
+/* ===== DETAIL DATA (from docx files) ===== */
+const DETAIL={
+1:{sections:[
+ {t:"基本情報",r:[["正式名称","浦和斎場"],["TEL","048-855-6246"],["FAX","048-855-6247"],["業務時間","8:30〜21:00"],["休業日","1/1〜1/3・臨時休業"],["構成市","さいたま市"],["構成市以外","火葬のみ可。葬祭場は市民限定"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型"],["式場","第1〜3葬祭場（100〜75席）※市民限定"],["常設祭壇","有（白木祭壇・仏式・神式）"],["待合室","10室"],["霊安室","有（3基）"],["売店","有"],["宿泊","可（寝具は葬儀社手配）"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜15:00（各3体）令和8年4月〜16:00枠追加"],["市外制限","市外利用者の火葬は11時のみ"],["12歳以上","市内 7,000円 / 市外 56,000円"],["12歳未満","市内 3,500円 / 市外 28,000円"],["死産児","市内 1,500円 / 市外 11,000円"]]},
+ {t:"待合室・付帯設備",r:[["待合室料金","市内 1,640円 / 市外 3,280円（/室・時間）"],["霊安室料金","市内 540円 / 市外 1,080円（/日）"]]},
+ {t:"注意事項",w:["令和8年3月31日をもって通夜室廃止","市外火葬は11時のみ（56,000円）","生活保護受給者・障害者手帳保持者は減免あり"]}
+]},
+2:{sections:[
+ {t:"基本情報",r:[["正式名称","大宮聖苑"],["TEL","048-682-2800"],["構成市","さいたま市"],["構成市以外","可（市外料金適用）"]]},
+ {t:"施設概要",r:[["施設タイプ","火葬専用（式場なし）"],["火葬炉","10基（大型8基・超大型2基）"],["待合室","10室（各最大40席）"],["霊安室","有（3基）"],["売店","有"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜15:00（各3体）令和8年4月〜16:00枠追加"],["12歳以上","市内 7,000円 / 市外 56,000円"],["12歳未満","市内 3,500円 / 市外 28,000円"],["死産児","市内 1,500円 / 市外 11,000円"]]},
+ {t:"待合室・付帯設備",r:[["待合室料金","市内 1,880円 / 市外 3,760円（/室・時間）"],["霊安室料金","市内 540円 / 市外 1,080円（/日）"]]},
+ {t:"注意事項",w:["火葬専用。式場は思い出の里会館またはひかり会館を利用","宮型霊柩車不可。ペット連れ込み不可（補助犬は可）"]}
+]},
+3:{sections:[
+ {t:"基本情報",r:[["正式名称","ひかり会館"],["TEL","048-852-5561"],["構成市","さいたま市（市民限定）"],["構成市以外","不可（法要は要相談）"]]},
+ {t:"施設概要",r:[["施設タイプ","葬祭場のみ（火葬は浦和斎場/大宮聖苑）"],["式場","第1葬祭場（100席）・第2葬祭場（30席・法要のみ）"],["待合室","1室（30席）"],["霊安室","有（2体まで）"],["霊柩車","有（浦和斎場/大宮聖苑間運行）"],["駐車場","15台程度（電車・タクシー推奨）"]]},
+ {t:"注意事項",w:["火葬場なし。火葬は浦和斎場/大宮聖苑","宮型霊柩車・案内板設置不可","駐車場15台のため公共交通推奨"]}
+]},
+4:{sections:[
+ {t:"基本情報",r:[["正式名称","思い出の里会館"],["TEL","048-686-3499"],["構成市","さいたま市（大宮聖苑とセット利用）"],["構成市以外","不可（法要は要相談）"]]},
+ {t:"施設概要",r:[["施設タイプ","葬祭場のみ（火葬は大宮聖苑）"],["式場","第1葬祭場（100席）・第2葬祭場（50席）"],["常設祭壇","有"],["待合室","和室4室・洋室3室"],["霊安室","有（3基）540円/1体1日"],["霊柩車","有（大宮聖苑間運行・有料）"],["駐車場","乗用車337台"]]},
+ {t:"利用時間",r:[["第1葬祭場","通夜 PM6:00〜7:00 / 告別式 AM10:30〜11:30 / 火葬 正午"],["第2葬祭場","通夜 PM5:00〜6:00 / 告別式 AM9:30〜10:30 / 火葬 AM11:00"]]},
+ {t:"注意事項",w:["令和5年4月リニューアルオープン","宮型霊柩車不可","通夜後：第1は21時まで・第2は20時までに退出"]}
+]},
+5:{sections:[
+ {t:"基本情報",r:[["正式名称","川口市めぐりの森"],["TEL","048-242-5414"],["FAX","048-242-5415"],["指定管理者","株式会社川口斎苑サービス"],["開場時間","8:45〜17:00"],["構成市","川口市"],["構成市以外","可（市外は希望日2日前17時から予約受付）"],["市民の定義","故人または申請者が川口市内在住"]]},
+ {t:"施設概要",r:[["施設タイプ","火葬専用施設（式場なし）"],["火葬炉","10基（予備4基）"],["告別収骨室","7室"],["待合室","大(48名)7室・小(20名)6室 計13室"],["売店","有（仕出し弁当・おしのぎ等）"],["駐車場","乗用車75台・霊柩車6台・マイクロバス11台"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00(3体)〜15:00(2体) 計13枠・最大27件/日"],["12歳以上","市内 30,000円 / 市外 100,000円"],["12歳未満","市内 15,000円 / 市外 50,000円"],["胎児(4ヶ月以上)","市内 15,000円 / 市外 50,000円"],["胎児(4ヶ月未満)","市内 7,500円 / 市外 25,000円"],["待合室料金","火葬使用料に含む（別途徴収なし）"]]},
+ {t:"予約方法",r:[["予約方法","インターネット予約システム（葬祭業者事前登録制）"],["川口市民","火葬希望日の14日前〜前日12時まで"],["川口市以外","火葬希望日の2日前17時から"],["予約URL","https://megurinomori.seagulloffice.com/kawaguchi"],["本予約切替","前日14時までに埋火葬許可証をFAXまたは窓口提出"]]},
+ {t:"注意事項",w:["棺最大寸法：長さ210cm×横65cm×縦60cm以内。超過は受入不可","棺の受入は火葬予約時間の20分前から。それ以前は車中待機","宮型霊柩車の乗り入れ不可。施設内での納棺行為不可","副葬品禁止：石油化学製品・カーボン製品・金属・ガラス・爆発物等","保冷剤は遺骨損傷の原因のため取り除くこと","施設内での楽器演奏・写真撮影不可","ペースメーカー・人工関節は必ず事前連絡","遅延繰り返しで予約制限の場合あり"]}
+]},
+6:{sections:[
+ {t:"基本情報",r:[["正式名称","川越市斎場 / 川越市民聖苑やすらぎのさと"],["TEL","049-226-0090"],["FAX","049-226-7088"],["開業時間","9:00〜21:00"],["休業日","1/1〜1/3"],["構成市","川越市"],["構成市以外","火葬のみ可。式場は川越市民等の条件あり"],["市民の定義","死亡者の住所（火葬）/ 故人・喪主が川越市民（式場）"]]},
+ {t:"施設概要",r:[["施設タイプ","斎場（火葬・小式場）＋市民聖苑（式場群）"],["火葬炉","12炉"],["式場","第1・2(150人)・第3・4(60人)・第5(100人)・第6(30人)・小式場1・2(各30人) 計8室"],["常設祭壇","有（市設備。持ち込み不可）"],["待合室","小(40人用)8室・大(60人用)2室"],["霊安室","斎場4基・市民聖苑10基"],["売店","有（待合ロビー）"],["宿泊","可（第6式場以外。聖苑10名/斎場4名程度）"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:30〜15:00（30分おき・13:00除く）通常18件/日・冬期20件/日"],["12歳以上","市内 無料 / 市外 48,000円"],["12歳未満","市内 無料 / 市外 32,000円"]]},
+ {t:"式場使用料",r:[["第1・2式場(150人)","通夜+告別 80,000円 / 告別のみ 40,000円"],["第3・4式場(60人)","通夜+告別 30,000円 / 告別のみ 15,000円"],["第5式場(100人)","通夜+告別 50,000円 / 告別のみ 25,000円"],["第6式場(30人)","通夜+告別 8,000円 / 告別のみ 4,000円"],["小式場1・2(30人)","通夜+告別 40,000円 / 告別のみ 20,000円"],["待合室(小)","市内 2,000円 / 市外 4,000円"],["待合室(大)","市内 3,000円 / 市外 6,000円"],["霊安室","1棺24時間 1,000円（超過12hごと500円）"]]},
+ {t:"予約方法",r:[["仮予約","電話・窓口・予約システム（利用日前日正午まで）"],["予約システム","https://www.kawagoe-saijo.jp/yoyaku/（登録業者のみ）"],["法要室","120日前から / その他30日前から予約可"]]},
+ {t:"注意事項",w:["祭壇・受付テーブル等は市設備を使用。持ち込み不可。花祭壇・花飾り不可","火葬受入時刻は厳守。出棺時に着棺予定時刻を電話連絡","棺にスプレー缶・金属・ガラス・プラ・書籍・ドライアイス等を入れないこと","宮型霊柩車・花輪・案内看板・案内人の配置は敷地内外問わず禁止","職員への心付け一切不可","式場利用は川越市民要件あり。事前に確認必須","生活保護受給者は使用料免除あり（証明書要）"]}
+]},
+7:{sections:[
+ {t:"基本情報",r:[["正式名称","所沢市斎場（火葬場）"],["TEL","04-2993-9931"],["運営","所沢市 / 指定管理者：所沢市公共施設管理公社"],["受付時間","8:30〜17:00（友引・1/1〜1/3除く）"],["駐車場","普通車195台・大型5台・身障者2台"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（火葬場＋式場）"],["火葬炉","8基"],["式場","第1(85人)・第2(50人)・第3(50人)・第5(40人)"],["控室","第1〜3(和洋室)・第5(洋室) ※式場とセット利用必須"],["待合室","第1〜3(和室)・第5〜6(洋室)"],["霊安室","あり（24時間単位）"],["売店","有人販売終了。自動販売機のみ"]]},
+ {t:"火葬情報",r:[["12歳以上","市内 5,000円 / 市外 60,000円"],["12歳未満","市内 3,000円 / 市外 36,000円"]]},
+ {t:"式場使用料",r:[["第1式場(85人)","市内 26,200円 / 市外 52,390円"],["第2式場(50人)","市内 16,240円 / 市外 32,480円"],["第3式場(50人)","市内 15,720円 / 市外 31,430円"],["第5式場(40人)","市内 13,100円 / 市外 26,200円"],["待合室","市内 2,100円 / 市外 7,340円"],["霊安室","市内 1,050円 / 市外 3,150円（24時間）"]]},
+ {t:"利用時間",r:[["通夜","PM4:30〜PM9:30"],["告別式","5時間以内（PM4:00まで）"],["夜間","PM9:30〜翌告別式前（1喪家5人以内）"],["休業日","1/1〜1/3：全施設 / 友引：火葬・告別式休場（通夜は可）"]]},
+ {t:"予約方法",r:[["予約システム","事前登録制。24時間予約可能"],["予約URL","https://saijyo3.seagulloffice.com/tokorozawa/user"],["支払窓口","市役所市民課・斎場・夜間休日受付の3ヶ所"]]},
+ {t:"注意事項",w:["式場利用は対応する控室とセット利用必須","夜間利用は1喪家5人以内","棺にガラス・金属・プラスチック・厚い布団等を入れないこと","ペースメーカーは事前申出必須","飲食手配はすべて利用者が自己手配"]}
+]},
+9:{sections:[
+ {t:"基本情報",r:[["正式名称","入間東部広域斎場 しののめの里"],["TEL","049-275-3030"],["FAX","049-275-3038"],["運営主体","入間東部地区事務組合（富士見市・ふじみ野市・三芳町）"],["休館日","友引、1/1〜1/2"],["構成市町","富士見市・ふじみ野市・三芳町"],["構成市以外","火葬のみ可（式場は原則住民のみ）"],["市民の定義","故人または申請者（喪主）が組合市町の住民基本台帳に登録"],["駐車場","普通車283台、バス8台、車椅子用6台"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（火葬場＋式場）"],["火葬炉","6基（大型炉1基含む）"],["第1式場","80席（親族控室・司祭控室・集会室併設）"],["第2式場","40席（親族控室・司祭控室・集会室併設）"],["第3式場","120席（親族控室・司祭控室・集会室併設）"],["待合室","7室（各48席）桔梗・桜草・木蓮・藤・百合・菊・秋桜"],["告別室","2室"],["収骨室","2室"],["霊安室","有（式場利用者のみ・受入15:00〜17:00・納棺必須）"],["売店","有"],["車椅子","8台（各式場2台+エントランス2台）"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:30〜14:30（1日13件）"],["大人（12歳以上）","組合内 10,000円 / 区域外 80,000円"],["子供（12歳未満）","組合内 5,000円 / 区域外 40,000円"]]},
+ {t:"式場使用料",r:[["第1式場(80席)","組合内 120,000円 / 区域外 利用不可（原則住民のみ）"],["第2式場(40席)","組合内 100,000円 / 区域外 利用不可"],["第3式場(120席)","組合内 150,000円 / 区域外 利用不可"],["待合室(1室48席)","組合内 5,000円 / 区域外 10,000円"],["待合室追加(2部屋目)","追加 20,000円"],["霊安室(1体1日)","組合内 2,000円 / 区域外 利用不可"],["式場使用時間","午後4時〜翌日午後3時（通夜〜告別式）"]]},
+ {t:"予約方法",r:[["予約方法","原則として葬儀業者がシステムで代行予約"],["火葬のみ","14日前から受付"],["式場利用","13日前から受付"],["区域外利用枠","9:30/10:00/10:30/11:00/13:30/14:00/14:30に限定"]]},
+ {t:"注意事項",w:["棺サイズ制限：幅70cm×長さ220cm×高さ60cm以内","総重量130kg超過は予約前に事務所へ電話連絡が必須。最終枠(14:30)での対応となる場合あり","宮形霊柩車の斎場内乗り入れ禁止","霊安室は式場利用者に限定。預かり後の面会・対面は一切不可","友引明けは非常に混み合う。参列者の移動時間を通常より5〜10分早めに設定すること","職員への心付けや飲食の提供は一切受取不可（公平性と品位の保持）"]}
+]},
+8:{sections:[
+ {t:"基本情報",r:[["正式名称","飯能斎場"],["所在地","埼玉県飯能市大字飯能948番地の3"],["構成市","飯能市・狭山市・日高市"],["構成市以外","利用可"],["予約方法","電話（事前申請不要）"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型"],["式場","1室（70席）"],["設備","お清め・遺族控室・僧侶控室・シャワー室"],["常設祭壇","無（持ち込み祭壇可）"],["霊安室","有"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:30〜14:30（30分おき・11枠）"],["大人（12歳以上）","構成市 5,000円 / 構成市以外 未確認"],["小人（12歳未満）","構成市 3,000円 / 構成市以外 未確認"]]},
+ {t:"待合室・付帯設備",r:[["待合室","有"],["待合室料金","基本無料。二間・大待合室 2,500円"]]},
+ {t:"注意事項",w:["オンラインの空き状況はリアルタイムでない","予約は電話で確認・予約のこと"]}
+]},
+10:{sections:[
+ {t:"基本情報",r:[["正式名称","上尾伊奈斎場つつじ苑"],["TEL","048-720-7870"],["FAX","048-723-8321"],["運営","公益財団法人 上尾市地域振興公社"],["開館時間","通夜なし日 8:30〜18:00 / 通夜あり日 8:30〜21:00"],["開門・閉門","開門 6:00 / 閉門 22:00"],["休館日","年始（1/1〜1/3）"],["構成市町","上尾市・伊奈町"],["構成市以外","可（区域外料金適用）"],["市民の定義","死亡者または利用者（祭祀主催者）の住所が上尾市または伊奈町"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（火葬場＋式場）"],["式場","第1(105㎡・60席)・第2(117㎡・80席)・第3(197㎡・150席)"],["常設祭壇","仏式3基・正宗式1基・神式1基・キリスト教式1基（外部持込不可）"],["遺族控室","3室（21畳・21畳・30畳）シャワー等完備"],["待合室(火葬のみ)","6室（各38席）"],["売店・喫茶","12席 9:00〜17:00"],["霊安室","有（当斎場で火葬を行うご遺体のみ）"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜16:00（1日8回）"],["15歳以上","管内 7,000円 / 区域外 61,900円"],["15歳未満","管内 3,500円 / 区域外 30,900円"],["死胎","管内 1,800円 / 区域外 15,400円"]]},
+ {t:"式場使用料",r:[["第1式場(60席)","通夜+告別 管内64,800円 / 区域外129,600円"],["第2式場(80席)","通夜+告別 管内69,600円 / 区域外139,200円"],["第3式場(150席)","通夜+告別 管内119,500円 / 区域外239,000円"],["待合室","管内 2,300円 / 区域外 4,600円"],["霊安室","管内 4,000円/日 / 区域外 8,000円/日"]]},
+ {t:"利用時間",r:[["通夜","PM4:00〜PM9:00"],["葬儀・告別式","翌AM9:00〜"],["告別式のみ","AM9:00〜PM3:00"],["線香等火気","PM8:30まで（翌日AM7:00から）"]]},
+ {t:"予約方法",r:[["登録業者","WEB予約システム（24時間対応）"],["未登録・個人","8:30〜17:00（電話または窓口）"],["予約変更","変更依頼書をFAX（048-723-8321）で送付"],["WEB予約URL","https://ageoina-saijotsutsujien.jp/"],["公式HP","https://www.ageo-kousya.or.jp/tsutsuji/"]]},
+ {t:"注意事項",w:["当斎場以外で葬儀を行った場合は火葬時刻の20分前までに必ず到着","宮型霊柩車の乗り入れ禁止。路上・民地への案内看板等設置禁止","館内全面禁煙。花輪設置禁止","斎場職員への心付けは固くお断り","ドライアイスは出棺前に必ず取り除くこと","ペースメーカー装着者は事前に斎場職員へ申告","1月4日（友引の場合は5日）の予約は上尾市民・伊奈町民を優先"]}
+]},
+12:{sections:[
+ {t:"基本情報",r:[["正式名称","越谷市斎場"],["TEL","048-960-6800"],["FAX","048-960-6801"],["運営","越谷市（市民協働部 市民課 斎場）"],["共同利用自治体","越谷市・吉川市・松伏町"],["市民の定義","故人が市民でなくても喪主が3市町に住む場合は市民料金"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（総合斎場）"],["火葬炉","14基"],["式場","4室（各80名）※第3・4統合利用可"],["霊安室","8室（式場利用者のみ）"],["待合室","14室（定員40人）"],["駐車場","普通車約350台"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜15:00（7枠）"],["12歳以上","市民 10,000円 / 市民以外 80,000円"],["12歳未満","市民 5,000円 / 市民以外 40,000円"],["死産児","市民 2,500円 / 市民以外 20,000円"]]},
+ {t:"式場使用料",r:[["1式場","150,000円（祭壇・控室含む）"],["第3・4統合","300,000円（大規模対応）"],["待合室","市民 4,000円 / 市民以外 32,000円"]]},
+ {t:"利用時間",r:[["式場1・3","通夜17:30 / 告別式10:00 / 火葬11:00"],["式場2・4","通夜18:30 / 告別式11:00 / 火葬12:00"],["休業日","火葬場：友引・1/1〜1/2 / 通夜：友引前日不可 / 告別式：友引当日不可"]]},
+ {t:"予約方法",r:[["予約方法","役所窓口に直接出向く（電話予約不可）"],["月〜金","8:30-17:15 市役所市民課"],["土日祝","市役所中央管理室（7:30〜21:00）"]]},
+ {t:"注意事項",w:["予約は電話不可。役所窓口直接申込","式場番号で時刻が完全固定","宮型霊柩車・花輪不可","ペースメーカーは事前申出必須"]}
+]},
+14:{sections:[
+ {t:"基本情報",r:[["正式名称","メモリアルトネ（広域利根斎場組合）"],["TEL","0480-65-8234"],["FAX","0480-65-8235"],["構成市町","加須市・久喜市・幸手市・宮代町"],["構成市以外","可（利用日2日前の10時以降に予約受付）"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型"],["式場","大式場（最大150席）・小式場（60席）"],["常設祭壇","有"],["火葬炉","8基"],["待合室","計10室"],["霊安室","有（1室・保冷庫2基）"],["売店","有"],["駐車場","乗用車150台・マイクロバス5台"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜15:00（合計18件/日）"],["大人（12歳以上）","管内 10,000円 / 管外 50,000円"],["小人（12歳未満）","管内 5,000円 / 管外 25,000円"],["死胎","管内 3,000円 / 管外 15,000円"]]},
+ {t:"式場使用料",r:[["大式場(3時間以内)","管内 64,000円 / 管外 128,000円"],["小式場(3時間以内)","管内 32,000円 / 管外 64,000円"],["待合室","管内 3,000円 / 管外 6,000円"],["霊安室","管内 4,000円 / 管外 20,000円（24時間）"]]},
+ {t:"注意事項",w:["宮型霊柩車・花輪・案内看板禁止","棺サイズ制限：幅655mm×高515mm×奥行2,100mm。重量150kgまで","全面禁煙・火気禁止・楽器演奏禁止。宿泊不可"]},
+ {t:"連絡先",r:[["公式HP","https://www.memorial-tone.jp/"]]}
+]},
+15:{sections:[
+ {t:"基本情報",r:[["正式名称","三郷市斎場"],["TEL","048-952-5885"],["FAX","048-952-8853"],["施設タイプ","式場併設型（火葬棟・式場棟・待合棟一体）"],["構成市","三郷市"],["構成市以外","火葬・本館式場のみ可。新館・安置室は市内専用"],["市民の定義","故人または葬儀主宰者（喪主）が三郷市民"]]},
+ {t:"施設概要",r:[["本館式場","90人収容"],["新館式場1・2","各30人収容（市内専用）"],["火葬炉","4基（うち大棺対応1基のみ）"],["待合室","本館1〜3・5号室(各18人) / 新館 菊・桔梗(各30人) / 待合棟 萩・藤(各48人)"],["安置室","有（市内専用。12/31〜1/2利用不可）"]]},
+ {t:"火葬情報(令和8年4月改定)",r:[["火葬時刻","9:30〜15:00"],["12歳以上","市内 10,000円 / 市外 130,000円"],["12歳未満・死胎","市内 3,000円 / 市外 40,000円"]]},
+ {t:"式場使用料",r:[["本館(通夜+告別)","市内 110,000円 / 市外 150,000円"],["本館(告別のみ)","市内 20,000円 / 市外 50,000円"],["新館(通夜+告別)","市内 50,000円 / 市外 利用不可"],["安置室","2日につき3,000円（市内のみ）"]]},
+ {t:"予約方法",r:[["予約システム","三郷市斎場予約システム（利用日前日正午まで）"],["電話・窓口","048-952-5885 または市民課"]]},
+ {t:"注意事項",w:["北西方向からの右折進入は中央分離帯により物理的に不可。迂回ルート必須","大棺（6.5尺以上）対応は1基のみ","本館式場90人収容だが告別式当日の待合室は合計36席のみ。参列者50名超は要注意","新館式場2の通夜開始は17:30か19:00の二択。申請時に即答必要","祭壇上への生花飾り禁止","火気は21時以降厳禁（線香・灯明すべて消火）","心付け禁止（菓子折り・酒・タバコ含む一切受取不可）"]}
+]},
+16:{sections:[
+ {t:"基本情報",r:[["正式名称","比企広域市町村圏組合 東松山斎場"],["TEL","0493-22-4279"],["FAX","0493-22-5695"],["受付時間","8:30〜17:15（友引日も受付あり）"],["構成市町村","東松山市・滑川町・嵐山町・小川町・ときがわ町・川島町・吉見町・東秩父村"],["構成市以外","可（料金7倍）"],["住民判定","死亡者または申請者が構成市町村に住民登録"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（火葬場＋葬祭場）"],["火葬炉","6基・動物炉1基"],["告別室","2室"],["収骨室","2室"],["葬祭場","1室（通夜・告別式対応）"],["待合室","7室＋待合ホール・多目的室・キッズルーム"],["駐車場","約200台・車いす4台・マイクロバス4台"]]},
+ {t:"火葬情報(2026年3月改定)",r:[["火葬時刻","9:30〜14:30（9枠）※3尺以下の棺は9:30〜10:30のみ ※大型(100kg以上)は13:30〜14:30のみ"],["満12歳以上","関係市町村 10,000円 / 区域外 70,000円"],["満12歳未満","関係市町村 7,000円 / 区域外 40,000円"],["胎児","関係市町村 7,000円 / 区域外 40,000円"],["身体の一部(1kg以内)","関係市町村 1,000円 / 区域外 7,000円"]]},
+ {t:"式場使用料",r:[["告別式(3時間以内)","関係市町村 10,000円 / 区域外 20,000円"],["通夜(PM3:00〜翌AM9:00)","関係市町村 50,000円 / 区域外 100,000円"],["待合室(2時間以内)","関係市町村 3,000円 / 区域外 8,000円"],["霊安室(2日以内)","関係市町村 3,000円 / 区域外 8,000円"],["霊柩車","5,000円（管内外同額）"]]},
+ {t:"予約方法",r:[["予約方法","電話予約（0493-22-4279）"],["区域外","通夜希望日2日前から受付"],["予約確認","https://higashimatsuyamasaijou.com/reservation/"]]},
+ {t:"注意事項",w:["入炉時刻の35分前までに搬入完了","6.5尺以上の棺は予約時に必ず申告","区域外住民の大型火葬（体重100kg以上）は不可","ドライアイスは炉内搬入前に必ず取り出すこと","ペースメーカー装着は事前に斎場職員へ申告","料理搬入は斎場指定業者のみ可","斎場勤務者への心づけ・お清めは一切受取不可","2026年3月料金改定済み。旧料金表は使用しないこと"]}
+]},
+17:{sections:[
+ {t:"基本情報",r:[["正式名称","越生斎場（おごせさいじょう）"],["TEL","049-292-5955"],["FAX","049-292-5956"],["事務局TEL","049-292-8808"],["受付時間","8:30〜17:00"],["休業日","友引の日 / 1/1〜1/3"],["構成市町","越生町・毛呂山町・鶴ヶ島市・鳩山町・坂戸市"],["構成市以外","可（料金約8倍・予約制限あり）"],["住民判定","死亡者が使用許可時または死亡時に構成市町の住民基本台帳に登録"]]},
+ {t:"施設概要",r:[["施設タイプ","火葬専用施設（式場なし）"],["火葬炉","6基"],["告別収骨室","6室（1炉につき1室・占有利用）"],["待合室","6室（2階・各最大35名）"],["売店","あり"],["霊安室","あり（身元不明の場合に限定）"],["駐車場","一般38台・身障者1台・マイクロバス6台"]]},
+ {t:"火葬情報",r:[["火葬時刻","10:00〜15:30（1日7枠・最大13件）"],["満12歳以上","構成市町 10,000円 / 構成市町以外 80,000円"],["満12歳未満","構成市町 5,000円 / 構成市町以外 50,000円"],["待合室","構成市町 3,000円 / 構成市町以外 10,000円"],["霊安室","構成市町 3,000円/2日間 / 構成市町以外 10,000円/2日間"]]},
+ {t:"予約方法",r:[["予約手順","①電話で仮予約→②申請書FAX送付→③役所で火葬許可証受領"],["電話受付","8:30〜17:00（年中無休）"],["WEB予約","なし（電話＋FAX）"]]},
+ {t:"注意事項",w:["火葬時刻の30分前までに来場。出棺時は斎場へ電話連絡","火葬専用施設。式場利用不可","宮型霊柩車不可。館内全面禁煙（2階喫煙室のみ）","霊安室は身元不明の遺体に限り利用可","区域外は「○」「△」枠のみ予約可。組合霊柩車は構成市町のみ利用可"]},
+ {t:"連絡先",r:[["公式HP","https://k-seien.sakura.ne.jp/"]]}
+]},
+19:{sections:[
+ {t:"基本情報",r:[["正式名称","熊谷市立葬斎施設「メモリアル彩雲」"],["TEL","048-521-0021"],["FAX","048-521-0153"],["構成市","熊谷市"],["構成市以外","可（市外料金適用）"],["予約方法","インターネット（斎場予約システム・登録制）"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型"],["式場","第一式場（70席）・第二式場（40席）"],["常設祭壇","有（持ち込み祭壇可：花祭壇等）"],["火葬炉","6基"],["待合室","6室"],["霊安室","有（火葬棟＋遺体保冷庫）"],["売店","有"],["宿泊","可（21:00〜翌8:00）"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00〜15:00（各時間2件・最大14件/日）"],["15歳以上","市民 10,000円 / 市外 60,000円"],["15歳未満","市民 5,000円 / 市外 30,000円"],["死産児","市民 2,500円 / 市外 15,000円"]]},
+ {t:"式場使用料",r:[["第一式場(70席) 通夜/告別各","市民 31,430円 / 市外 94,290円"],["第二式場(40席) 通夜/告別各","市民 20,950円 / 市外 62,860円"],["待合室","市民 3,140円 / 市外 9,430円（1回2時間）"],["霊安室","市民 1,050円 / 市外 3,140円（24時間）"]]},
+ {t:"注意事項",w:["宮型霊柩車の乗り入れ不可","式場は当施設で火葬を行う場合のみ利用可","分骨希望は事前に総合事務室へ申出"]}
+]},
+20:{sections:[
+ {t:"基本情報",r:[["正式名称","深谷市火葬場 深丘園（しんきゅうえん）"],["TEL","048-585-2900"],["FAX","048-585-8400"],["休業日","友引の日・1/1・1/2"],["構成市","深谷市"],["構成市以外","可（市外料金適用）"],["市民の定義","死亡者または申請者（葬儀執行者）が深谷市の住民基本台帳に登録"],["駐車場","乗用車約50〜55台・マイクロバス5台"]]},
+ {t:"施設概要",r:[["施設タイプ","火葬場＋小ホール併設型（大規模式場なし）"],["人体炉","6基"],["ペット炉","1基"],["告別室","3室"],["収骨室","3室"],["待合室","洋室6室（32人×2/40人×2/44人×2）"],["小ホール","定員20人以内（祭壇設営不可・飲食不可）"],["霊安室","有（受入9:00〜16:30）保冷庫実費500円/日"],["売店","なし（自販機のみ）"]]},
+ {t:"火葬情報",r:[["火葬時刻","午前9:00〜12:00 / 午後13:00〜16:00（1日14枠）"],["大人（12歳以上）","市民 7,000円 / 市民外 100,000円"],["小人（12歳未満）","市民 3,500円 / 市民外 50,000円"],["死産児","市民 1,000円 / 市民外 30,000円"],["待合室(2時間以内)","市民 3,000円 / 市外 6,000円"]]},
+ {t:"予約方法",r:[["業者予約","登録業者が専用システムで24時間予約"],["個人・電話","深丘園（048-585-2900）へ直接"],["ペット火葬","システム予約不可。電話予約必須"]]},
+ {t:"注意事項",w:["宮型霊柩車の場内乗り入れ禁止","小ホール内での飲食一切禁止。祭壇設営不可・外飾り不可","待合ホール（ロビー）での食事禁止","ペースメーカー装着の場合は必ず事前申告","棺サイズ：長さ2,100mm×幅650mm×高さ500mm以内","体重100kg超はシステム備考欄に記載＋口頭申告必須","斎場職員への心付け・お清め等は一切禁止"]}
+]},
+21:{sections:[
+ {t:"基本情報",r:[["正式名称","斎場・こだま聖苑"],["TEL","0495-76-1881"],["FAX","0495-76-1882"],["指定管理者","株式会社サニタリーセンター（〜令和10年3月）"],["休館日","友引の日・1/1・1/2"],["宗教対応","宗派不問（仏式・神式等いずれも可）"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（火葬場＋式場）"],["火葬炉","5基"],["汚物炉","1基"],["式場","100人収容"],["常設祭壇","仏式祭壇・放送設備（無料貸出）"],["収骨室","2室"],["待合室","5室"],["霊安室","有（1回2日以内）"],["売店","有（酒・ジュース・たばこ）"]]},
+ {t:"火葬情報",r:[["火葬時刻","午前9:00〜11:00 / 午後13:00〜15:00（1日10枠）"],["12歳以上","圏域内 7,000円 / 圏域外 60,000円"],["12歳未満","圏域内 4,000円 / 圏域外 30,000円"],["改葬","圏域内 4,000円 / 圏域外 20,000円"]]},
+ {t:"式場・待合室使用料",r:[["式場 通夜(17:00-20:30)","圏域内 10,000円 / 圏域外 20,000円"],["式場 葬儀等(9:00-16:30)","圏域内 20,000円 / 圏域外 40,000円"],["待合室 火葬中利用","圏域内 3,000円 / 圏域外 6,000円"],["霊安室(2日以内)","圏域内 3,000円 / 圏域外 10,000円"]]},
+ {t:"予約方法",r:[["予約ルート","各市町村の担当課窓口へ直接来庁（葬儀社代行可）"],["同時手続き","火葬予約＋火葬許可証交付＋式場利用申込を同時に完了"]]},
+ {t:"注意事項",w:["火葬予約時間の30分前までに来場すること（厳守）","宮型霊柩車の乗り入れ厳禁","ロビーでの飲食禁止。100名超の場合は待合室への誘導が必須","宿泊不可（通夜終了後は原則退去）","翌日精算時に申請者の印鑑が必要","斎場職員への心付け・お清め等は一切不可","ペースメーカー使用の場合は必ず職員へ申告"]}
+]},
+23:{sections:[
+ {t:"基本情報",r:[["正式名称","羽生市斎場"],["TEL/FAX","048-561-0436（FAX兼用）"],["施設タイプ","火葬専用型（式場なし）"],["休場日","1/1・1/2・友引の日"],["予約受付","8:30〜17:00（休場日も電話・FAX予約可）"],["構成市","羽生市"],["構成市以外","可（市外料金約15倍）"],["市民の定義","死亡者または申請者（喪主等）が羽生市の住民基本台帳に登録"]]},
+ {t:"施設概要",r:[["施設タイプ","火葬専用（式場なし）"],["待合室(和室)","第1〜3和室 計3室（各約16名）"],["2室併用","第2・第3和室のみ仕切り外しで併用可"]]},
+ {t:"火葬情報",r:[["火葬時刻","9:00/9:30/10:00/13:00/13:30/14:00（6枠）"],["大人（15歳以上）","市内 3,000円 / 市外 45,000円"],["子供（15歳未満）","市内 2,000円 / 市外 30,000円"],["死産児","市内 1,000円 / 市外 15,000円"],["和室(3時間)","3,000円/室（市内外同額）"]]},
+ {t:"予約方法",r:[["予約窓口","電話・FAX（048-561-0436）"],["特例","休場日（1/1・1/2・友引）でも予約受付可"]]},
+ {t:"注意事項",w:["火葬専用施設。式場・儀式スペースなし","死産児（妊娠7ヶ月以降）は死後24時間経過後でなければ火葬不可","ペースメーカー装着者は必ず事務所へ事前申告","飲食持ち込み可だがゴミは全て持ち帰り","斎場職員への心付け・お清め等は禁止","収骨後、火葬日時入りの死体埋火葬許可証を確実にご遺族へ返還すること"]}
+]},
+26:{sections:[
+ {t:"基本情報",r:[["正式名称","朝霞市斎場"],["TEL","048-460-0055"],["FAX","048-460-0056"],["運営","公益財団法人 朝霞市文化・スポーツ振興公社"],["営業時間","9:00〜21:30（受付8:30〜）"],["休館日","1/1〜1/3"],["構成市","朝霞市"],["市民の定義","喪主または死亡者が朝霞市に居住"],["駐車場","計86台（乗用車83台・障害者2台・マイクロバス1台）"]]},
+ {t:"施設概要",r:[["施設タイプ","式場専用型（火葬場なし）"],["第一式場(2階)","145席"],["第二式場(3階)","75席"],["和室控室","けやき(48席)・いちょう(32席)・ふじ(32席)・きく(48席)・ゆり(32席)・ききょう(32席)"],["安置室","1室（遺体保冷庫6体分）"],["火葬設備","なし（外部火葬場への移動が必要）"]]},
+ {t:"式場使用料",r:[["第一式場・控室","市内 3,700円/時間 / 市外 7,400円/時間"],["第二式場・控室","市内 2,500円/時間 / 市外 5,000円/時間"],["和室(けやき・きく)","市内 1,900円/時間 / 市外 3,800円/時間"],["和室(ふじ・ききょう)","市内 1,500円/時間 / 市外 3,000円/時間"],["安置室","市内 100円/時間 / 市外 200円/時間"]]},
+ {t:"利用時間",r:[["建物全体の貸出","通夜当日14:00〜告別式当日14:00"],["和室(通夜)","17:00〜21:30"],["和室(告別式)","9:00〜17:00"],["最終出棺","原則13:00まで"],["夜間閉門","21:30〜翌朝8:00（外出一切禁止）"]]},
+ {t:"予約方法",r:[["受付時間","8:30〜21:30"],["申込方法","斎場窓口に直接申し込み"],["法要利用","市内4ヶ月前・市外3ヶ月前から"]]},
+ {t:"注意事項",w:["火葬場なし。出棺後の外部火葬場への移動手配が必須","最終出棺は原則13時まで。厳守","楽器演奏・合唱・音響設備持ち込み一切禁止","21:30〜翌8:00は施設外への出入り一切禁止","敷地内全面禁煙","寝具なし（葬儀社手配必須）","一度納付された利用料金は原則返金不可","斎場では供花の手配・現金書留受取は一切行わない"]}
+]},
+27:{sections:[
+ {t:"基本情報",r:[["正式名称","新座市営墓園"],["TEL","048-479-5688"],["FAX","048-479-5682"],["運営","新座市（指定管理者：新座メモリアルグループ）"],["施設利用時間","9:00〜22:00（通夜利用時は終日可）"],["受付時間","8:30〜17:15"],["休園日","1/1〜1/3"],["構成市","新座市"],["市民の定義","喪主または死亡者が新座市内に住所を有"],["駐車場","123台"]]},
+ {t:"施設概要",r:[["施設タイプ","式場専用型（火葬場なし）"],["斎場A","約100名（洋室A・Bを付帯利用可）"],["斎場B","約100名（洋室C・和室Dを付帯利用可）"],["洋室A・B・C","各約36名"],["和室D","約50名"],["安置室","1遺体収容（原則48時間以内）"],["売店","有（生花・線香等）"]]},
+ {t:"式場使用料",r:[["斎場A","市民 2,610円/時間 / 市民以外 5,220円/時間"],["斎場B","市民 1,670円/時間 / 市民以外 3,340円/時間"],["洋室A・B・C","市民 1,040円/時間 / 市民以外 2,080円/時間"],["和室D","市民 1,040円/時間 / 市民以外 2,080円/時間"],["安置室","市民 100円/時間 / 市民以外 200円/時間"]]},
+ {t:"予約方法",r:[["受付開始","利用月を含む3ヶ月前の初日から"],["初日(1日)","管理事務所窓口にて直接受付"],["翌日(2日)以降","電話予約可"],["本申請","利用日1ヶ月前まで。窓口で申請＋使用料前払い"]]},
+ {t:"注意事項",w:["火葬場なし。告別式後に外部火葬場への移動手配が必須","安置室は原則48時間以内。火葬待ちの繁忙期は注意","1時間単位の課金制。片付け・清掃時間も含めた予備枠を確保すること","一度納めた使用料は原則返却不可","洋室の組み合わせルール：A・Bは斎場A用、C・和室Dは斎場B用"]}
+]},
+11:{sections:[
+ {t:"基本情報",r:[["正式名称","県央みずほ斎場"],["TEL","048-569-2800（斎場事務所）"],["FAX","048-569-2838"],["運営主体","埼玉県央広域事務組合（鴻巣市・桶川市・北本市）"],["指定管理者","県央みずほ斎苑管理グループ（イージス・グループ＋東京ワックス）"],["開場時間","通夜なし日 8:30〜17:00 / 通夜あり日 8:30〜21:00"],["完全休場日","1/1・1/2"],["友引日","休場（使用許可申請・通夜のみ利用可）"],["構成市","鴻巣市・桶川市・北本市"],["構成市以外","可（管外料金・火葬料約8.5倍）"],["住民判定","死亡者または申請者（葬儀執行者）が構成3市の住民基本台帳に登録"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（総合斎場）"],["火葬炉","人体用8基、小動物用1基、産汚物等用1基"],["第1式場","120席（祭壇・遺族控室・式場控室・僧侶等控室完備）"],["第2式場","80席（同上）"],["告別室・収骨室","各3室"],["待合室","和室2室(各54名)・洋室4室(40〜44名) 計6室"],["霊安室","有（1室2設備・管内住民のみ・越年利用不可）"],["売店","有（飲食物・小動物用骨壺等）"],["車椅子","6台（事務所受付）"],["駐車場","第1:乗用車153台+マイクロバス9台 / 第2:乗用車125台+マイクロバス1台 / 第3(関係者):40台 合計318台"]]},
+ {t:"火葬情報",r:[["大人（15歳以上）","管内 7,000円 / 管外 60,000円"],["小人（15歳未満）","管内 3,500円 / 管外 30,000円"],["死産児","管内 2,100円 / 管外 18,000円"],["身体の一部","管内 3,150円 / 管外 15,750円"],["改葬","管内 5,000円 / 管外 25,000円"]]},
+ {t:"式場使用料",r:[["第1式場(120席) 通夜〜告別","管内 105,000円 / 管外 210,000円"],["第2式場(80席) 通夜〜告別","管内 84,000円 / 管外 168,000円"],["待合室(2時間以内)","管内 3,150円 / 管外 6,300円"],["待合室超過(1時間毎)","管内 1,575円 / 管外 3,150円"],["霊安室(24時間以内)","管内 4,200円 / 管外 利用不可"]]},
+ {t:"住民判定の証明書類",r:[["使用許可申請時","会葬礼状、または見積書の写し"],["葬儀終了後","葬儀費用の請求書、または領収書の写し"]]},
+ {t:"注意事項",w:["宮型霊柩車の乗り入れは一律禁止","外飾りの花輪設置不可。生花・盛籠は式場内に限る","撮影は式場・控室・告別室・収骨室・待合個室内に限定。ロビー等共有スペースは撮影禁止","職員に対するお清め・志等の授受は一切不可","待合ロビーでの飲食は禁止（待合室・式場控室は持込可・ゴミ持ち帰り必須）","霊安室の越年利用（1/1・1/2を含む）は不可","ペースメーカー装着の場合は必ず事前に職員へ申し出ること"]}
+]},
+13:{sections:[
+ {t:"基本情報",r:[["正式名称","埼葛斎場組合斎場"],["TEL（斎場直通）","048-752-3441"],["TEL（事務局）","048-752-1531"],["FAX","048-754-0022"],["運営主体","埼葛斎場組合（春日部市・蓮田市・白岡市・杉戸町）"],["休館日","1/1〜1/3、友引の日"],["営業時間","8:30〜17:00"],["構成市町","春日部市・蓮田市・白岡市・杉戸町"],["構成市以外","可（組合外料金適用）"],["住民判定","死亡時に構成市町に住民票がある方"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（葬祭棟＋火葬棟＋待合棟）"],["火葬炉","8炉（超大型炉1炉含む）"],["告別室","4室"],["収骨室","3室"],["式場","1室（50人収容）"],["式場付帯","控室2室、清め室1室"],["祭壇","備え付け使用が原則。花祭壇は設置不可"],["待合室","8室"],["霊安室","1室"],["小動物炉","1炉"],["駐車場","乗用車70台・マイクロバス11台・車いす用3台"]]},
+ {t:"火葬情報",r:[["火葬枠","9時〜15時（7枠）※式場利用時は午前中枠に限定"],["12歳以上","組合内 10,000円 / 組合外 60,000円"],["12歳未満","組合内 5,000円 / 組合外 40,000円"]]},
+ {t:"式場使用料",r:[["式場（仮泊なし）","組合内 50,000円 / 組合外 100,000円"],["式場（仮泊あり）","組合内 60,000円 / 組合外 120,000円"],["式場（通夜のみ）","組合内 25,000円 / 組合外 50,000円"],["式場（告別式のみ）","組合内 25,000円 / 組合外 50,000円"],["霊安室（1昼夜）","組合内 2,000円 / 組合外 4,000円"],["待合室（1室）","7,000円（組合外 13,000円）"]]},
+ {t:"時間制限",r:[["告別式","正午（12:00）完全撤収（延長不可）"],["友引当日","火葬・告別式不可（休場）"],["友引の通夜","翌日友引明けの告別式の場合は実施可能"],["12月31日の通夜","不可"]]},
+ {t:"行政連絡先",r:[["春日部市役所","048-736-1111"],["蓮田市役所","048-768-3111"],["白岡市役所","0480-92-1111"],["杉戸町役場","0480-33-1111"]]},
+ {t:"注意事項",w:["祭壇は備え付け使用が原則。花祭壇は設置不可","式場利用時の火葬は午前中（9時〜12時）の枠に限定。午後枠は火葬のみ利用者用","告別式は正午（12:00）完全撤収。延長不可","ペット受付は建物北側（裏側）。一般葬儀動線と交差する場合があるため注意","組合外ペット火葬は合同葬のみ（単独葬は組合内居住者のみ）","住所確認書類（運転免許証・マイナンバーカード等）の提示が必須"]}
+]},
+22:{sections:[
+ {t:"基本情報",r:[["正式名称","行田市斎場"],["TEL/FAX","048-559-1996"],["所在地","埼玉県行田市大字佐間1751番地"],["アクセス","JR高崎線「吹上駅」より車で約10分"],["休業日","1/1・1/2・友引の日"],["友引の日","火葬は休み。通夜利用・翌日告別式準備は可能（事務所は午後1時以降開場）"],["構成市","行田市"],["構成市以外","可（市民以外料金適用・火葬枠制限あり）"],["市民の定義","故人が行田市民、または葬儀執行親族が申請時に行田市民"]]},
+ {t:"施設概要",r:[["施設タイプ","式場併設型（式場・火葬場・待合室・法要ホール・霊安室）"],["式場","第1・第2（各70席程度）仏具備え付け"],["法要ホール","第1・第2（各72席）※式場利用者が火葬中の待機・食事に利用"],["待合室","4室（各36名定員）※式場利用者は利用不可（法要ホールを使用）"],["霊安室(保冷庫)","有（市民限定・火葬予約がある場合のみ）"],["駐車場","乗用車108台・バス3台"],["祭壇","仏式祭壇・厨子・神式祭壇は各1セットのみ。予約が重なると調整あり"]]},
+ {t:"火葬情報",r:[["火葬時刻(市民)","9:30/10:00/10:30/12:30/13:00/13:30"],["市民以外の枠制限","10:30・12:30・13:00は利用不可（9:30/10:00/13:30のみ）"],["12歳以上","市民 10,000円 / 市民以外 70,000円"],["棺サイズ制限","高さ54cm×幅64cm×長さ197cm以内（厳守・1cmの超過も不可）"]]},
+ {t:"式場・施設使用料",r:[["式場(通夜・告別セット)","市民 35,000円 / 市民以外 80,000円（各3時間）"],["法要ホール(告別式)","市民 6,000円 / 市民以外 12,000円（3時間）"],["待合室(1室)","市民 3,000円 / 市民以外 6,000円（3時間）"],["霊安室(24時間)","市民 4,000円 / 市民以外 利用不可"]]},
+ {t:"利用時間",r:[["通夜","17:00〜20:00（20:00完全施錠→法要ホールへ移動）"],["告別式開始","火葬が10:30以降の場合、告別式は午前9:00以降に設定"],["受入時刻","火葬時刻の30分前に斎場到着"],["法要ホール","原則3時間以内"]]},
+ {t:"予約方法",r:[["予約方法","斎場予約システムで枠確保"],["行政手続","市役所へ死亡届提出→利用許可証取得"],["FAX送信","利用開始の24時間前までに斎場宛に予約確認書をFAX送信（必須）"]]},
+ {t:"注意事項",w:["棺サイズ制限：高さ54cm×幅64cm×長さ197cm以内。特大棺は受入不可。受任時に故人の体格を必ず確認","式場利用者は待合室を利用できない（法要ホールを使用する排他ルール）","仏式祭壇の厨子・神式祭壇は1セットのみ。予約重複時は斎場側から調整あり","「回答不可」設定を選ぶと弔電も届かなくなる。ご遺族に必ず念押しすること","骨葬は当斎場で火葬した場合のみ可能。告別式のみ利用・午後2時までに返却必須","友引の日は事務所午後1時以降の開場。午前中の現場入りは不可"]}
+]},
+18:{sections:[
+ {t:"基本情報",r:[["正式名称","秩父斎場"],["TEL","0494-23-1678"],["運営主体","秩父広域市町村圏組合"],["所在地","秩父市大宮5361番地2"],["休場日","毎週日曜日、1/1・1/2"],["構成市町","秩父市・横瀬町・皆野町・長瀞町・小鹿野町"],["構成市以外","可（組合外料金適用）"],["住民判定","故人が組合内→組合内料金。故人が組合外でも申請者(喪主)が組合内で申請する場合→組合内料金適用"]]},
+ {t:"施設概要（重要：火葬専用型）",r:[["施設タイプ","火葬専用型（式場なし）"],["人体炉","4基"],["動物炉","1基"],["棺サイズ制限","長さ210cm×幅70cm×高さ60cm以内"],["告別・収骨室","4室（告別と収骨を同一室で行う運用）"],["待合室(大)","4室（各50人程度収容）"],["待合室(小)","1室（25人程度収容）"],["待合ホール","32席"],["多目的室","1室"],["霊安庫","2体分（原則火葬日まで）"],["売店","なし（告別台にはアルコールランプ式ローソクと造花あり）"],["付帯設備","キッズコーナー・授乳室・救護室（簡易ベッド・着替え利用可）"],["霊柩車","あり（2時間以内：組合内10,000円/組合外20,000円）"]]},
+ {t:"火葬情報",r:[["12歳以上","組合内 10,000円 / 組合外 60,000円"],["12歳未満","組合内 6,000円 / 組合外 40,000円"],["死産児","組合内 3,000円 / 組合外 20,000円"],["改葬","組合内 6,000円 / 組合外 40,000円"],["身体の一部","組合内 3,000円 / 組合外 20,000円"]]},
+ {t:"待合室・付帯設備使用料",r:[["待合室(大・2時間以内)","組合内 6,000円 / 組合外 9,000円"],["待合室(小・2時間以内)","組合内 3,000円 / 組合外 4,500円"],["多目的室(1時間)","組合内 3,000円 / 組合外 4,500円"],["霊安庫(2日間以内)","組合内 3,000円 / 組合外 13,000円"]]},
+ {t:"予約方法",r:[["葬祭業者","専用システムを通じて24時間365日対応可能"],["一般の方（電話）","月曜日〜土曜日 8:00〜16:45"]]},
+ {t:"注意事項",w:["火葬専用施設。式場（通夜・告別式会場）はなし。外部式場・寺院・自宅等で儀式後に搬送","毎週日曜日は火葬・霊安庫・霊柩車の全業務停止","売店なし。線香・生花・お茶・飲食料品等は全て持参または葬儀社手配が必要","棺サイズ：長さ210cm×幅70cm×高さ60cm以内。規格外は受入不可","ペースメーカー装着の場合は必ず事前申告","死産児は母の住所、改葬は申請者の住所、身体の一部は本人の住所で住民判定"]}
+]}
+};
+
+/* ===== Helper Functions ===== */
+function yen(v){if(v===null||v===undefined)return"-";if(v===0)return"無料";return v.toLocaleString()+"円";}
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+function availTag(v){
+  if(v==="yes")return'<span class="avail-tag avail-yes">可</span>';
+  if(v==="no")return'<span class="avail-tag avail-no">不可</span>';
+  if(v==="cond")return'<span class="avail-tag avail-cond">条件付</span>';
+  return'<span style="color:var(--gray-dark);font-size:.75rem">-</span>';
+}
+function bookingTag(s){
+  if(!s)return'<span class="booking-tag" style="background:#eee;color:#999">未確認</span>';
+  const tags=[];
+  if(s.includes("web"))tags.push('<span class="booking-tag booking-web">WEB予約</span>');
+  if(s.includes("tel"))tags.push('<span class="booking-tag booking-tel">電話予約</span>');
+  if(s.includes("window"))tags.push('<span class="booking-tag booking-window">窓口予約</span>');
+  return tags.join(" ");
+}
+
+/* ===== Render Functions ===== */
+function renderItem(s){
+  let h=`<div class="saijo-item"><div class="saijo-name">${esc(s.name)}`;
+  if(s.fac.includes("c")&&s.fac.includes("h"))h+=`<span class="saijo-badge badge-crematory">火葬場</span><span class="saijo-badge badge-hall">式場</span>`;
+  else if(s.fac.includes("c"))h+=`<span class="saijo-badge badge-crematory">火葬場</span>`;
+  else h+=`<span class="saijo-badge badge-hall">式場のみ</span>`;
+  if(s.tp==="private")h+=`<span class="saijo-badge badge-private">民営</span>`;
+  h+=`</div>`;
+  h+=`<div class="saijo-detail">\u{1F4CD} ${esc(s.addr)} <a href="https://www.google.com/maps/search/${encodeURIComponent(s.addr)}" target="_blank" rel="noopener">[地図]</a></div>`;
+  h+=`<div class="saijo-detail">\u{1F3E2} ${esc(s.op)}</div>`;
+
+  /* Info table */
+  h+=`<table class="info-table">`;
+  h+=`<tr><th>\u{1F4C5} 予約方法</th><td>${bookingTag(s.booking)}</td></tr>`;
+  if(s.tel)h+=`<tr><th>\u{260E}\u{FE0F} TEL</th><td><a href="tel:${s.tel}" style="color:var(--navy);font-weight:600">${esc(s.tel)}</a>${s.fax?' <span style="font-size:.75rem;color:var(--gray-dark)">FAX:'+esc(s.fax)+'</span>':''}</td></tr>`;
+  if(s.fac.includes("c")){
+    h+=`<tr><th>\u{1F525} 火葬料（組合員）</th><td style="font-weight:700;font-size:1rem;color:var(--navy-dark)">${yen(s.fee.m)}</td></tr>`;
+    h+=`<tr><th>\u{1F525} 火葬料（組合外）</th><td style="font-weight:600;color:var(--red)">${yen(s.fee.nm)}</td></tr>`;
+    h+=`<tr><th>組合外の火葬利用</th><td>${availTag(s.cremNm)}</td></tr>`;
+  }
+  if(s.fac.includes("h")&&s.halls&&s.halls.length>0){
+    const hallStr=s.halls.map(x=>`${esc(x.n)}：${typeof x.s==="number"?x.s+"席":x.s+"席"}`).join("<br>");
+    h+=`<tr><th>\u{1F3DB}\u{FE0F} 式場（${s.halls.length}室）</th><td>${hallStr}</td></tr>`;
+    if(s.fac.includes("c"))h+=`<tr><th>組合外の式場利用</th><td>${availTag(s.hallNm)}</td></tr>`;
+  }
+  if(s.mun.length>1)h+=`<tr><th>構成市町村</th><td>${s.mun.map(esc).join("、")}</td></tr>`;
+  h+=`</table>`;
+
+  if(s.note)h+=`<div style="margin-top:8px;font-size:.8rem;color:#8d6e00;background:#fff8e1;padding:6px 10px;border-radius:6px">\u{26A0}\u{FE0F} ${esc(s.note)}</div>`;
+
+  /* Action buttons */
+  h+=`<div class="btn-row">`;
+  if(s.bookingUrl)h+=`<a href="${esc(s.bookingUrl)}" target="_blank" rel="noopener" class="btn-action btn-web">\u{1F310} WEB予約</a>`;
+  if(s.tel)h+=`<a href="tel:${s.tel}" class="btn-action btn-tel">\u{1F4DE} 斎場に電話する</a>`;
+  if(s.hp)h+=`<a href="${esc(s.hp)}" target="_blank" rel="noopener" class="btn-action btn-hp">\u{1F3E0} 公式ホームページ</a>`;
+  if(DETAIL[s.id])h+=`<button class="btn-action btn-detail" onclick="openDetail(${s.id})">\u{1F4CB} 斎場詳細</button>`;
+  else h+=`<span class="btn-action btn-disabled">\u{1F4CB} 詳細資料準備中</span>`;
+  h+=`</div>`;
+
+  h+=`</div>`;
+  return h;
+}
+
+/* ===== Detail Modal ===== */
+function openDetail(id){
+  const d=DETAIL[id];if(!d)return;
+  const f=D.find(x=>x.id===id);
+  document.getElementById("detailTitle").textContent=f.name+" 詳細資料";
+  let h="";
+  d.sections.forEach(sec=>{
+    h+=`<div class="modal-section"><div class="modal-section-title">${esc(sec.t)}</div>`;
+    if(sec.r){
+      h+=`<table class="modal-table">`;
+      sec.r.forEach(row=>{h+=`<tr><th>${esc(row[0])}</th><td>${esc(row[1])}</td></tr>`;});
+      h+=`</table>`;
+    }
+    if(sec.w){
+      h+=`<ul class="modal-warnings">`;
+      sec.w.forEach(item=>{h+=`<li>\u{26A0}\u{FE0F} ${esc(item)}</li>`;});
+      h+=`</ul>`;
+    }
+    h+=`</div>`;
+  });
+  /* Add action buttons in modal too */
+  h+=`<div class="btn-row" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-mid)">`;
+  if(f.bookingUrl)h+=`<a href="${esc(f.bookingUrl)}" target="_blank" rel="noopener" class="btn-action btn-web">\u{1F310} WEB予約</a>`;
+  if(f.tel)h+=`<a href="tel:${f.tel}" class="btn-action btn-tel">\u{1F4DE} 斎場に電話する</a>`;
+  if(f.hp)h+=`<a href="${esc(f.hp)}" target="_blank" rel="noopener" class="btn-action btn-hp">\u{1F3E0} 公式ホームページ</a>`;
+  h+=`</div>`;
+  document.getElementById("detailBody").innerHTML=h;
+  document.getElementById("detailModal").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeDetail(){
+  document.getElementById("detailModal").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+/* ===== Core Functions ===== */
+function init(){
+  const dl=document.getElementById("municipalityList");
+  MUNS.forEach(m=>{const o=document.createElement("option");o.value=m;dl.appendChild(o);});
+  const ql=document.getElementById("quickList");
+  ["さいたま市","川口市","川越市","所沢市","越谷市","春日部市","草加市","熊谷市","朝霞市","戸田市","入間市","狭山市","上尾市","新座市","三郷市","富士見市"].forEach(m=>{
+    const b=document.createElement("button");b.textContent=m;
+    b.onclick=()=>{document.getElementById("searchInput").value=m;doSearch();};ql.appendChild(b);
+  });
+  buildAll();buildMun();buildStats();
+  document.getElementById("searchInput").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch();});
+}
+
+function doSearch(){
+  const input=document.getElementById("searchInput").value.trim();
+  const res=document.getElementById("results");
+  switchTab("search");
+  if(!input){res.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--gray-dark)">市区町村名を入力してください</div>';return;}
+  const mun=MUNS.find(m=>m===input||input.includes(m)||m.includes(input));
+  if(!mun){res.innerHTML=`<div class="result-card no-crematory"><div class="result-municipality">${esc(input)}</div><p style="color:var(--red)">該当する市区町村が見つかりません。埼玉県内の市区町村名を正確に入力してください。</p></div>`;return;}
+  const matched=D.filter(s=>s.mun.includes(mun));
+  const crems=matched.filter(s=>s.fac.includes("c"));
+  const halls=matched.filter(s=>s.fac.includes("h")&&!s.fac.includes("c"));
+  const noInfo=NO_CREM[mun];
+  let h="";
+  h+=`<div class="result-card${crems.length===0&&noInfo?" no-crematory":""}">`;
+  h+=`<div class="result-municipality">${esc(mun)} の方</div>`;
+  if(crems.length>0){
+    const pub=crems.some(s=>s.tp==="public");
+    if(pub)h+=`<span class="result-status ok">市民料金で利用可能な公営火葬場あり</span>`;
+    else h+=`<span class="result-status private-status">民営火葬場（市民料金区分あり）</span>`;
+  }else{h+=`<span class="result-status none">管轄の公営火葬場なし</span>`;}
+  if(crems.length>0){h+=`<h3 style="font-size:.9rem;color:var(--navy);margin:14px 0 10px;font-weight:700">\u{1F525} 利用可能な火葬場</h3>`;crems.forEach(s=>{h+=renderItem(s);});}
+  if(halls.length>0){h+=`<h3 style="font-size:.9rem;color:var(--navy);margin:14px 0 10px;font-weight:700">\u{1F3DB}\u{FE0F} 利用可能な公営式場（火葬場なし）</h3>`;halls.forEach(s=>{h+=renderItem(s);});}
+  if(noInfo)h+=`<div class="note-box"><strong>備考：</strong>${esc(noInfo)}</div>`;
+  h+=`</div>`;res.innerHTML=h;
+}
+
+function buildAll(){
+  const el=document.getElementById("allCards");
+  const crems=D.filter(s=>s.fac.includes("c"));
+  const honly=D.filter(s=>!s.fac.includes("c"));
+  let h=`<h3 style="font-size:.95rem;color:var(--navy);margin:10px 0 12px;padding:8px 12px;background:var(--gray);border-radius:6px">\u{1F525} 火葬場・斎場（${crems.length}施設）</h3>`;
+  crems.forEach(s=>{h+=renderItem(s);});
+  h+=`<h3 style="font-size:.95rem;color:var(--navy);margin:20px 0 12px;padding:8px 12px;background:var(--gray);border-radius:6px">\u{1F3DB}\u{FE0F} 式場のみ（${honly.length}施設）</h3>`;
+  honly.forEach(s=>{h+=renderItem(s);});
+  el.innerHTML=h;
+}
+
+function buildMun(){
+  const tb=document.getElementById("munTableBody");
+  let h="";
+  MUNS.forEach(m=>{
+    const matched=D.filter(s=>s.mun.includes(m)&&s.fac.includes("c"));
+    const halls=D.filter(s=>s.mun.includes(m)&&!s.fac.includes("c"));
+    const noInfo=NO_CREM[m];
+    let names=matched.map(s=>{let l=s.name;if(s.tp==="private")l+="(民営)";return l;});
+    if(halls.length>0)names=names.concat(halls.map(s=>s.name+"(式場のみ)"));
+    const feeStr=matched.length>0?matched.map(s=>yen(s.fee.m)).join(" / "):"-";
+    let status="";
+    if(matched.length>0&&matched.some(s=>s.tp==="public"))status='<span style="color:var(--green);font-weight:600">\u{25CE}</span>';
+    else if(matched.length>0)status='<span style="color:#8d6e00;font-weight:600">\u{25B3}</span>';
+    else status='<span style="color:var(--red);font-weight:600">\u{2715}</span>';
+    h+=`<tr>
+      <td style="cursor:pointer;color:var(--navy);font-weight:600;white-space:nowrap" onclick="document.getElementById('searchInput').value='${m}';doSearch();">${esc(m)}</td>
+      <td>${names.length>0?names.map(esc).join("、"):(noInfo?'<span style="font-size:.72rem;color:var(--gray-dark)">'+esc(noInfo).substring(0,30)+'\u{2026}</span>':"-")}</td>
+      <td style="white-space:nowrap">${feeStr}</td>
+      <td>${status}</td>
+    </tr>`;
+  });
+  tb.innerHTML=h;
+}
+
+function buildStats(){
+  const cc=D.filter(s=>s.fac.includes("c")&&s.tp==="public").length;
+  const pc=D.filter(s=>s.tp==="private").length;
+  const hc=D.filter(s=>!s.fac.includes("c")).length;
+  const cm=new Set();D.filter(s=>s.fac.includes("c")).forEach(s=>s.mun.forEach(m=>cm.add(m)));
+  document.getElementById("stats").innerHTML=`
+    <div class="stat-card"><div class="stat-number">${cc}</div><div class="stat-label">公営火葬場</div></div>
+    <div class="stat-card"><div class="stat-number">${pc}</div><div class="stat-label">民営火葬場</div></div>
+    <div class="stat-card"><div class="stat-number">${hc}</div><div class="stat-label">式場のみ</div></div>
+    <div class="stat-card"><div class="stat-number">${cm.size}<span style="font-size:.9rem;font-weight:400">/${MUNS.length}</span></div><div class="stat-label">市町村カバー</div></div>`;
+}
+
+function switchTab(t){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>{
+    b.classList.toggle("active",["search","alllist","allmunicipality"][i]===t);
+  });
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById("tab-"+t).classList.add("active");
+}
+
+init();
+</script>
+</body>
+</html>
